@@ -1,0 +1,15 @@
+{
+  "name": "seed2success",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "BackEnd",
+    "frontEnd"
+  ],
+  "scripts": {
+    "backend": "npm --prefix BackEnd run dev",
+    "frontend": "npm --prefix frontEnd run dev",
+    "backend:start": "npm --prefix BackEnd run start",
+    "frontend:build": "npm --prefix frontEnd run build"
+  }
+}
