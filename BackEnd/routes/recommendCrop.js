@@ -5,10 +5,6 @@ const { getRegionOptions, recommendCrops } = require("../Services/cropEngine");
 const { getWeatherForDistrict } = require("../Services/weatherService");
 const { fetchCropProduction, getLocalCropNames } = require("../Services/govDataService");
 
-/**
- * POST /recommend-crop/farm-input
- * Receives farmer inputs and returns top 3 crop recommendations.
- */
 router.post("/farm-input", async (req, res) => {
   try {
     const result = await recommendCrops(req.body);

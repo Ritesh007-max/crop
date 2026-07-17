@@ -300,12 +300,9 @@ function App() {
     setHarvestResult(null);
 
     try {
-      const formData = new FormData();
-      if (data.files.report) formData.append("report", data.files.report);
-      Object.keys(data.files.photos || {}).forEach((key) => formData.append(`photo_${key}`, data.files.photos[key]));
-      formData.append("answers", JSON.stringify(data.answers));
-
-      const response = await axios.post(`${BASE_URL}/api/harvest/analyze`, formData);
+      const response = await axios.post(`${BASE_URL}/api/harvest/analyze`, {
+        answers: data.answers
+      });
       setHarvestResult(response.data);
 
       const session = {

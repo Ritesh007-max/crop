@@ -166,7 +166,7 @@ function buildActionSteps({ readinessVerdict, weather, storageAvailable, transpo
   return steps;
 }
 
-function analyzeHarvest({ answers = {}, fileCount = 0 }) {
+function analyzeHarvest({ answers = {} }) {
   const maturityStage = answers.maturityStage || "Nearly ready";
   const labourAvailable = normalizeBoolean(answers.labourAvailable);
   const equipmentAvailable = normalizeBoolean(answers.equipmentAvailable);
@@ -178,14 +178,13 @@ function analyzeHarvest({ answers = {}, fileCount = 0 }) {
   const cropProfile = getCropProfile(cropType);
   const weather = buildWeatherRisk(answers.weatherConcerns);
 
-  const imageSignal = clamp(fileCount * 3, 0, 12);
   const storagePenalty = storageAvailable ? 0 : 8;
   const transportPenalty = transportArranged ? 0 : 6;
   const labourPenalty = labourAvailable ? 0 : 14;
   const equipmentPenalty = equipmentAvailable ? 0 : 6;
 
   const readinessScore = clamp(
-    (MATURITY_SCORES[maturityStage] || 65) + imageSignal - weather.totalRisk - storagePenalty - transportPenalty,
+    (MATURITY_SCORES[maturityStage] || 65) - weather.totalRisk - storagePenalty - transportPenalty,
     20,
     98
   );
@@ -228,13 +227,12 @@ function analyzeHarvest({ answers = {}, fileCount = 0 }) {
       landSize,
       maturityStage,
       readinessScore,
-      fileCount,
     },
     cards: {
       harvestReadiness: {
         verdict: readinessVerdict,
         score: readinessScore,
-        confidence: fileCount >= 3 ? "High" : fileCount >= 1 ? "Moderate" : "Low",
+        confidence: "High",
         reasons: [
           `Farmer marked the crop as "${maturityStage}".`,
           weather.overallRisk === "Low" ? "No major weather obstacles were reported." : `Weather risk is currently ${weather.overallRisk.toLowerCase()}.`,

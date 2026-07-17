@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Menu, X, Clock, Activity, LoaderCircle, LogOut } from "lucide-react";
+import { Menu, X, Clock, Activity, LoaderCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import PhaseNavigation from "../components/PhaseNavigation";
 import SidebarFooter from "../components/SidebarFooter";
-import HarvestPhotoUploader from "../components/HarvestPhotoUploader";
 import HarvestGuidedQuestions from "../components/HarvestGuidedQuestions";
 import HarvestActionCards from "../components/HarvestActionCards";
 
@@ -22,7 +21,6 @@ function HarvestInterface({
   onEditProfile,
 }) {
   const { t } = useTranslation();
-  const [files, setFiles] = useState({ photos: {}, report: null });
   const [answers, setAnswers] = useState({
     maturityStage: "Nearly ready",
     cropType: "",
@@ -35,16 +33,12 @@ function HarvestInterface({
     weatherConcerns: ["No weather concerns"],
   });
 
-  const handleFileChange = (type, value) => {
-    setFiles((prev) => ({ ...prev, [type]: value }));
-  };
-
   const handleAnswerChange = (field, value) => {
     setAnswers((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = () => {
-    onSubmit({ files, answers });
+    onSubmit({ answers });
   };
 
   return (
@@ -157,7 +151,6 @@ function HarvestInterface({
 
           {!loading && !result ? (
             <>
-              <HarvestPhotoUploader files={files} onFileChange={handleFileChange} />
               <HarvestGuidedQuestions answers={answers} onAnswerChange={handleAnswerChange} />
             </>
           ) : null}
