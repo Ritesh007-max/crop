@@ -247,7 +247,6 @@ function App() {
       formData.append("answers", JSON.stringify(data.answers));
 
       const selectedImage = data.files.photos?.leaf || data.files.photos?.field || Object.values(data.files.photos || {}).find(Boolean);
-      const healthResponse = await axios.post(`${BASE_URL}/api/crop-health/analyze`, formData);
       let diseaseResponse = null;
 
       if (selectedImage) {
@@ -263,15 +262,15 @@ function App() {
               disease_name: null,
               confidence: 0,
               vision_labels: [],
-              treatment: "Image disease detection is unavailable until the backend API keys are configured.",
-              warning: "Plant.id or Google Vision is not configured on the backend.",
+              treatment: _error.response?.data?.error || "Image disease detection is unavailable until the backend API keys are configured.",
+              warning: "Gemini API is not configured or returned an error on the backend.",
             },
           };
         }
       }
 
       const mergedResult = {
-        ...healthResponse.data,
+        success: true,
         diseaseDetection: diseaseResponse?.data || null,
       };
       setPhase2Result(mergedResult);

@@ -33,6 +33,26 @@ function GuidedQuestions({ answers, onAnswerChange }) {
         </div>
 
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="rounded-2xl border border-brand-100 bg-brand-50/40 p-4 sm:p-5 col-span-1 lg:col-span-2">
+            <h3 className="text-[14px] font-display font-bold text-gray-800 mb-1">Crop Type</h3>
+            <p className="text-[12px] text-gray-500 mb-4">Choose the crop you are analyzing.</p>
+            <select
+              value={answers.crop || ""}
+              onChange={(e) => onAnswerChange("crop", e.target.value)}
+              className="w-full px-3 py-2.5 rounded-xl border border-gray-200 bg-white text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 transition-all cursor-pointer"
+            >
+              <option value="">-- Select Crop --</option>
+              <option value="Tomato">Tomato</option>
+              <option value="Rice">Paddy / Rice</option>
+              <option value="Wheat">Wheat</option>
+              <option value="Maize">Maize</option>
+              <option value="Cotton">Cotton</option>
+              <option value="Sugarcane">Sugarcane</option>
+              <option value="Chili">Chili</option>
+              <option value="Gourd">Gourd / Cucurbits</option>
+            </select>
+          </div>
+
           <div className="rounded-2xl border border-brand-100 bg-brand-50/40 p-4 sm:p-5">
             <h3 className="text-[14px] font-display font-bold text-gray-800 mb-1">1. Current Crop Growth Stage</h3>
             <p className="text-[12px] text-gray-500 mb-4">Choose the stage that best matches the field right now.</p>
