@@ -13,6 +13,7 @@ function ChatInterface({
   sidebarOpen, onToggleSidebar,
   user, onLogout, onEditProfile,
   requestLocationAccess, locating,
+  onGenerateRecommendations,
 }) {
   const { t } = useTranslation();
 
@@ -164,6 +165,7 @@ function ChatInterface({
               onFieldChange={onFieldChange}
               requestLocationAccess={requestLocationAccess}
               locating={locating}
+              onGenerateRecommendations={onGenerateRecommendations}
             />
           )}
 

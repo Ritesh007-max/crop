@@ -1,8 +1,8 @@
-import { MapPin } from "lucide-react";
+import { MapPin, Sprout } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import GoogleMapLocationPicker from "./GoogleMapLocationPicker";
 
-function InputBox({ formState, districts, onFieldChange, requestLocationAccess, locating }) {
+function InputBox({ formState, districts, onFieldChange, requestLocationAccess, locating, onGenerateRecommendations }) {
   const { t } = useTranslation();
 
   return (
@@ -75,6 +75,24 @@ function InputBox({ formState, districts, onFieldChange, requestLocationAccess, 
             <p className="mt-1.5 text-[12px] leading-relaxed text-brand-900">{formState.farmAddress}</p>
           </div>
         ) : null}
+
+        {/* Generate Button */}
+        <div className="mt-5 pt-4 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={() => onGenerateRecommendations && onGenerateRecommendations(formState)}
+            disabled={locating}
+            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl
+              bg-gradient-to-r from-brand-600 to-brand-500
+              text-white font-semibold text-sm
+              shadow-lg shadow-brand-500/20 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5
+              disabled:opacity-60 disabled:cursor-wait disabled:hover:translate-y-0
+              transition-all duration-200"
+          >
+            <Sprout size={16} />
+            {t("planning.generateBtn")}
+          </button>
+        </div>
       </div>
     </div>
   );

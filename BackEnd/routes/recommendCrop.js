@@ -173,57 +173,67 @@ const { calculateCropScore } = require("../utils/scoring");
  */
 router.post("/from-location", async (req, res) => {
   try {
-    const { latitude, longitude } = req.body;
+    let { latitude, longitude, state: bodyState, district: bodyDistrict } = req.body;
+    let lat, lon;
+    let state = bodyState || "";
+    let district = bodyDistrict || "";
+    let country = "India";
 
-    if (latitude === undefined || longitude === undefined || isNaN(parseFloat(latitude)) || isNaN(parseFloat(longitude))) {
-      return res.status(400).json({ error: "Latitude and longitude are required." });
-    }
+    if (latitude !== undefined && longitude !== undefined && !isNaN(parseFloat(latitude)) && !isNaN(parseFloat(longitude))) {
+      lat = parseFloat(latitude);
+      lon = parseFloat(longitude);
 
-    const lat = parseFloat(latitude);
-    const lon = parseFloat(longitude);
-
-    // 1. Reverse Geocoding via Nominatim
-    let state = "";
-    let district = "";
-    let country = "";
-
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2&addressdetails=1`, {
-        headers: { "User-Agent": "Seed2SuccessApp/1.0" },
-        signal: AbortSignal.timeout(3000)
-      });
-      if (response.ok) {
-        const data = await response.json();
-        const addr = data.address || {};
-        country = addr.country || "India";
-        state = addr.state || "";
-        district = addr.county || addr.district || addr.state_district || addr.city || addr.town || "";
-      }
-    } catch (err) {
-      console.warn("Nominatim reverse geocoding failed, using distance-based mapping fallback:", err.message);
-    }
-
-    // Geocoding Fallback: distance mapping to nearest coordinate in seed database
-    if (!state || !district) {
-      let closestState = "Andhra Pradesh";
-      let closestDistrict = "West Godavari";
-      let minDistance = Infinity;
-
-      for (const [sName, districtsObj] of Object.entries(districtCoordinates)) {
-        for (const [dName, coords] of Object.entries(districtsObj)) {
-          const dist = Math.sqrt(
-            Math.pow(coords.lat - lat, 2) + Math.pow(coords.lon - lon, 2)
-          );
-          if (dist < minDistance) {
-            minDistance = dist;
-            closestState = sName;
-            closestDistrict = dName;
+      if (!state || !district) {
+        // 1. Reverse Geocoding via Nominatim
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2&addressdetails=1`, {
+            headers: { "User-Agent": "Seed2SuccessApp/1.0" },
+            signal: AbortSignal.timeout(3000)
+          });
+          if (response.ok) {
+            const data = await response.json();
+            const addr = data.address || {};
+            country = addr.country || "India";
+            state = addr.state || "";
+            district = addr.county || addr.district || addr.state_district || addr.city || addr.town || "";
           }
+        } catch (err) {
+          console.warn("Nominatim reverse geocoding failed, using distance-based mapping fallback:", err.message);
+        }
+
+        // Geocoding Fallback: distance mapping to nearest coordinate in seed database
+        if (!state || !district) {
+          let closestState = "Andhra Pradesh";
+          let closestDistrict = "West Godavari";
+          let minDistance = Infinity;
+
+          for (const [sName, districtsObj] of Object.entries(districtCoordinates)) {
+            for (const [dName, coords] of Object.entries(districtsObj)) {
+              const dist = Math.sqrt(
+                Math.pow(coords.lat - lat, 2) + Math.pow(coords.lon - lon, 2)
+              );
+              if (dist < minDistance) {
+                minDistance = dist;
+                closestState = sName;
+                closestDistrict = dName;
+              }
+            }
+          }
+          state = closestState;
+          district = closestDistrict;
         }
       }
-      state = closestState;
-      district = closestDistrict;
-      country = country || "India";
+    } else if (state && district) {
+      // Look up coordinates from state and district
+      const stateObj = districtCoordinates[state];
+      const coords = stateObj ? stateObj[district] : null;
+      if (!coords) {
+        return res.status(400).json({ error: `Coordinates not found for state: ${state}, district: ${district}` });
+      }
+      lat = coords.lat;
+      lon = coords.lon;
+    } else {
+      return res.status(400).json({ error: "Either latitude/longitude or state/district must be provided." });
     }
 
     // 2. SoilGrids API

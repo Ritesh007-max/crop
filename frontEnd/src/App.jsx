@@ -54,6 +54,10 @@ function App() {
           state: updatedUser.state || prev.state,
           district: updatedUser.district || prev.district,
         }));
+
+        if (updatedUser.state && updatedUser.district) {
+          fetchRecommendations({ state: updatedUser.state, district: updatedUser.district });
+        }
         
         return { success: true };
       }
@@ -90,6 +94,62 @@ function App() {
   const [locating, setLocating] = useState(false);
   const hasAutoLocated = useRef(false);
 
+  // Phase 1 State
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState(null);
+  const [sessions, setSessions] = useState([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  async function fetchRecommendations(locationParams) {
+    const { latitude, longitude, state, district } = locationParams;
+    const hasCoords = typeof latitude === "number" && typeof longitude === "number";
+    const hasRegion = state && district;
+
+    if (!hasCoords && !hasRegion) {
+      setErrorMessage("Please select a location or detect your location first.");
+      return;
+    }
+
+    setLoading(true);
+    setErrorMessage("");
+    setResult(null);
+
+    try {
+      const payload = hasCoords ? { latitude, longitude } : { state, district };
+      const response = await axios.post(`${BASE_URL}/api/recommend-crop/from-location`, payload);
+      const data = response.data;
+      setResult(data);
+
+      const updatedForm = {
+        ...formState,
+        latitude: data.farmer_profile.latitude,
+        longitude: data.farmer_profile.longitude,
+        state: data.farmer_profile.state,
+        district: data.farmer_profile.district,
+        farmAddress: data.farmer_profile.farmAddress || `${data.farmer_profile.district}, ${data.farmer_profile.state}, ${data.farmer_profile.country}`
+      };
+      setFormState(updatedForm);
+
+      // Add to session history
+      const session = {
+        id: Date.now(),
+        timestamp: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
+        state: data.farmer_profile.state,
+        district: data.farmer_profile.district,
+        topCrop: data.top_crops?.[0]?.crop || "N/A",
+        score: data.top_crops?.[0]?.suitability_score || 0,
+        result: data,
+        formState: updatedForm,
+      };
+      setSessions((prev) => [session, ...prev]);
+    } catch (error) {
+      setErrorMessage(error.response?.data?.error || "Unable to retrieve recommendation. Make sure the backend is running.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function requestLocationAccess(force = false) {
     if (!navigator.geolocation) {
       setErrorMessage("Geolocation is not supported by your browser.");
@@ -100,47 +160,8 @@ function App() {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        setLoading(true);
-        setErrorMessage("");
-        setResult(null);
-
-        try {
-          const response = await axios.post(`${BASE_URL}/api/recommend-crop/from-location`, {
-            latitude,
-            longitude,
-          });
-          const data = response.data;
-          setResult(data);
-
-          // Update form state with retrieved coordinates and geocoded info
-          const updatedForm = {
-            ...formState,
-            latitude,
-            longitude,
-            state: data.farmer_profile.state,
-            district: data.farmer_profile.district,
-            farmAddress: `${data.farmer_profile.district}, ${data.farmer_profile.state}, ${data.farmer_profile.country}`
-          };
-          setFormState(updatedForm);
-
-          // Add to session history
-          const session = {
-            id: Date.now(),
-            timestamp: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
-            state: data.farmer_profile.state,
-            district: data.farmer_profile.district,
-            topCrop: data.top_crops?.[0]?.crop || "N/A",
-            score: data.top_crops?.[0]?.suitability_score || 0,
-            result: data,
-            formState: updatedForm,
-          };
-          setSessions((prev) => [session, ...prev]);
-        } catch (error) {
-          setErrorMessage(error.response?.data?.error || "Unable to retrieve recommendation from location. Make sure the backend is running.");
-        } finally {
-          setLoading(false);
-          setLocating(false);
-        }
+        setLocating(false);
+        await fetchRecommendations({ latitude, longitude });
       },
       (error) => {
         console.error("Geolocation error:", error);
@@ -153,18 +174,15 @@ function App() {
   }
 
   useEffect(() => {
-    if (token && !formState.latitude && !hasAutoLocated.current) {
+    if (token && !hasAutoLocated.current) {
       hasAutoLocated.current = true;
-      requestLocationAccess(false);
+      if (user && user.state && user.district) {
+        fetchRecommendations({ state: user.state, district: user.district });
+      } else {
+        requestLocationAccess(false);
+      }
     }
   }, [token]);
-  
-  // Phase 1 State
-  const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [result, setResult] = useState(null);
-  const [sessions, setSessions] = useState([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Phase 2 State
   const [phase2Loading, setPhase2Loading] = useState(false);
@@ -364,7 +382,8 @@ function App() {
       formState, districts, onFieldChange: updateField, loading, errorMessage, result,
       sessions, onSelectSession: handleSelectSession,
       sidebarOpen, onToggleSidebar: () => setSidebarOpen(!sidebarOpen),
-      requestLocationAccess, locating, user, onLogout: handleLogout
+      requestLocationAccess, locating, user, onLogout: handleLogout,
+      onGenerateRecommendations: fetchRecommendations
     },
     health: {
       sessions: phase2Sessions, onSelectSession: handleSelectPhase2Session, sidebarOpen: phase2SidebarOpen,
