@@ -92,6 +92,11 @@ function SellingCards({ result }) {
             {formatCurrency(estimatedPriceRange?.low)} - {formatCurrency(estimatedPriceRange?.high)}
           </p>
           <p className="text-[13px] text-brand-900">Expected revenue around {formatCurrency(estimatedPriceRange?.expectedRevenue)}</p>
+          {estimatedPriceRange?.source && (
+            <div className="mt-3 pt-2 border-t border-brand-100/50 text-[10px] font-semibold text-brand-600 uppercase tracking-wider">
+              Source: {estimatedPriceRange.source}
+            </div>
+          )}
         </CardShell>
 
         <CardShell icon={<ChartColumn size={20} className="text-brand-700" />} title="Historical Price Context" subtitle={historicalPriceContext?.trend} className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">

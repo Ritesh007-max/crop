@@ -6,7 +6,7 @@ const { analyzeSelling } = require("../Services/sellingEngine");
 const router = express.Router();
 const upload = multer();
 
-router.post("/analyze", upload.any(), (req, res) => {
+router.post("/analyze", upload.any(), async (req, res) => {
   let answers = {};
 
   try {
@@ -18,17 +18,23 @@ router.post("/analyze", upload.any(), (req, res) => {
     });
   }
 
-  const analysis = analyzeSelling({
-    answers,
-    fileCount: Array.isArray(req.files) ? req.files.length : 0,
-  });
+  try {
+    const analysis = await analyzeSelling({
+      answers,
+      fileCount: Array.isArray(req.files) ? req.files.length : 0,
+    });
 
-  setTimeout(() => {
     res.json({
       success: true,
       ...analysis,
     });
-  }, 1000);
+  } catch (err) {
+    console.error("Selling analysis failed:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Failed to run selling analysis.",
+    });
+  }
 });
 
 module.exports = router;

@@ -1,3 +1,5 @@
+const { fetchLiveMandiPrices } = require("./govDataService");
+
 const BASE_PRICES = {
   paddy: { low: 1900, high: 2350, trend: "average" },
   rice: { low: 2100, high: 2550, trend: "average" },
@@ -109,7 +111,7 @@ function getBuyerKey(channel) {
   return "mandi";
 }
 
-function analyzeSelling({ answers = {}, fileCount = 0 }) {
+async function analyzeSelling({ answers = {}, fileCount = 0 }) {
   const cropType = answers.cropType || "General crop";
   const quantity = toNumber(answers.quantityValue, 25);
   const quantityUnit = answers.quantityUnit || "quintals";
@@ -119,8 +121,26 @@ function analyzeSelling({ answers = {}, fileCount = 0 }) {
   const buyerPreference = answers.buyerPreference || "Request suggestion";
   const qualitySignal = answers.qualitySignal || "average";
   const defectLevel = answers.defectLevel || "medium";
+  const state = answers.state || "";
+  const district = answers.district || "";
 
-  const profile = getPriceProfile(cropType);
+  let profile = getPriceProfile(cropType);
+  let liveSource = "";
+
+  try {
+    const livePrices = await fetchLiveMandiPrices(state, district, cropType);
+    if (livePrices) {
+      profile = {
+        low: livePrices.low,
+        high: livePrices.high,
+        trend: "average"
+      };
+      liveSource = livePrices.source;
+    }
+  } catch (err) {
+    console.warn("Mandi API fetch failed, falling back to static price profile.", err.message);
+  }
+
   const qualityScore = clamp(
     62 +
       (qualitySignal === "strong" ? 18 : qualitySignal === "weak" ? -15 : 0) +
@@ -191,6 +211,7 @@ function analyzeSelling({ answers = {}, fileCount = 0 }) {
         high: priceHigh,
         unit: `per ${quantityUnit === "kilograms" ? "kg" : quantityUnit === "bags" ? "bag" : quantityUnit === "crates" ? "crate" : "quintal"}`,
         expectedRevenue: averageRevenue,
+        source: liveSource || "National crop market baseline",
       },
       historicalPriceContext: {
         trend: priceContext,

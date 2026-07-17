@@ -332,7 +332,13 @@ function App() {
     try {
       const formData = new FormData();
       Object.keys(data.files.photos || {}).forEach((key) => formData.append(`photo_${key}`, data.files.photos[key]));
-      formData.append("answers", JSON.stringify(data.answers));
+      
+      const answersWithLocation = {
+        ...data.answers,
+        state: formState.state,
+        district: formState.district
+      };
+      formData.append("answers", JSON.stringify(answersWithLocation));
 
       const response = await axios.post(`${BASE_URL}/api/selling/analyze`, formData);
       setSellingResult(response.data);

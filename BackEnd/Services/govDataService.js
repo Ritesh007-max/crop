@@ -171,7 +171,92 @@ async function getLocalCropNames(state, district) {
   }
 }
 
+/**
+ * Fetch current daily mandi prices from the government APMC dataset.
+ * Filters by state, district, and commodity.
+ *
+ * @param {string} state
+ * @param {string} district
+ * @param {string} commodity
+ * @returns {Promise<{ low: number, high: number, modal: number, count: number, source: string } | null>}
+ */
+async function fetchLiveMandiPrices(state, district, commodity) {
+  if (!GOV_API_KEY) return null;
+  if (!state || !commodity) return null;
+
+  const resourceId = "9ef84268-d588-465a-a308-a864a43d0070";
+  const normalisedState = state.trim();
+  const normalisedDistrict = district ? district.trim() : null;
+
+  let url = `${BASE_URL}/${resourceId}?api-key=${GOV_API_KEY}&format=json&limit=100&filters[state]=${encodeURIComponent(normalisedState)}`;
+  
+  if (normalisedDistrict) {
+    url += `&filters[district]=${encodeURIComponent(normalisedDistrict)}`;
+  }
+
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(6000) });
+    if (!response.ok) return null;
+    const data = await response.json();
+    
+    if (!data || data.status !== "ok" || !data.records || data.records.length === 0) {
+      if (normalisedDistrict) {
+        // Fallback: try state-only if district query had no records
+        return fetchLiveMandiPrices(state, null, commodity);
+      }
+      return null;
+    }
+
+    const records = data.records;
+    const targetCrop = commodity.toLowerCase();
+    const matchingRecords = records.filter(r => 
+      String(r.commodity || "").toLowerCase().includes(targetCrop) ||
+      targetCrop.includes(String(r.commodity || "").toLowerCase())
+    );
+
+    if (matchingRecords.length === 0) {
+      if (normalisedDistrict) {
+        // Fallback: try state-only if district query had no matches
+        return fetchLiveMandiPrices(state, null, commodity);
+      }
+      return null;
+    }
+
+    let totalMin = 0;
+    let totalMax = 0;
+    let totalModal = 0;
+    let count = 0;
+
+    for (const r of matchingRecords) {
+      const minVal = Number(r.min_price);
+      const maxVal = Number(r.max_price);
+      const modalVal = Number(r.modal_price);
+      
+      if (!isNaN(minVal) && !isNaN(maxVal) && !isNaN(modalVal)) {
+        totalMin += minVal;
+        totalMax += maxVal;
+        totalModal += modalVal;
+        count++;
+      }
+    }
+
+    if (count === 0) return null;
+
+    return {
+      low: Math.round(totalMin / count),
+      high: Math.round(totalMax / count),
+      modal: Math.round(totalModal / count),
+      count: count,
+      source: `Mandi daily market data (${matchingRecords[0].market || "local market"})`
+    };
+  } catch (err) {
+    console.error("Failed to fetch live Mandi prices:", err.message);
+    return null;
+  }
+}
+
 module.exports = {
   fetchCropProduction,
   getLocalCropNames,
+  fetchLiveMandiPrices,
 };
