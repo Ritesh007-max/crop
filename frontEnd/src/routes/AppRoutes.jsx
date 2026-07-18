@@ -6,7 +6,6 @@ import Harvesting from "../pages/Harvesting";
 import Selling from "../pages/Selling";
 import Schemes from "../pages/Schemes";
 import Subscription from "../pages/Subscription";
-import Prediction from "../pages/Prediction";
 import NotFound from "../pages/NotFound";
 
 function AppRoutes({ token, user, onLogin, onLogout, onEditProfile, props }) {
@@ -26,7 +25,6 @@ function AppRoutes({ token, user, onLogin, onLogout, onEditProfile, props }) {
       <Route path="/selling" element={<Selling user={user} onLogout={onLogout} onEditProfile={onEditProfile} {...props.selling} />} />
       <Route path="/schemes" element={<Schemes user={user} onLogout={onLogout} onEditProfile={onEditProfile} {...props.schemes} />} />
       <Route path="/subscription" element={<Subscription user={user} onLogout={onLogout} onEditProfile={onEditProfile} {...props.subscription} />} />
-      <Route path="/prediction" element={<Prediction user={user} onLogout={onLogout} onEditProfile={onEditProfile} {...props.prediction} />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

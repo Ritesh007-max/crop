@@ -3,7 +3,7 @@ const { analyzeHarvest } = require("../Services/harvestEngine");
 
 const router = express.Router();
 
-router.post("/analyze", (req, res) => {
+router.post("/analyze", async (req, res) => {
   let answers = {};
 
   try {
@@ -21,16 +21,22 @@ router.post("/analyze", (req, res) => {
     });
   }
 
-  const analysis = analyzeHarvest({
-    answers,
-  });
+  try {
+    const analysis = await analyzeHarvest({
+      answers,
+    });
 
-  setTimeout(() => {
     res.json({
       success: true,
       ...analysis,
     });
-  }, 1200);
+  } catch (err) {
+    console.error("Harvest analysis failed:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Failed to run harvest analysis.",
+    });
+  }
 });
 
 module.exports = router;

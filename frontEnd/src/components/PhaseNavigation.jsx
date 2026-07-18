@@ -1,14 +1,13 @@
-import { Sprout, Activity, Wheat, BadgeIndianRupee, Landmark, Crown, Brain } from "lucide-react";
+import { Sprout, Activity, Wheat, BadgeIndianRupee, Landmark, Crown } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router-dom";
 
 const PHASES = [
-  { path: "/", tKey: "nav.phase1", label: "Phase 1: Planning", icon: Sprout },
-  { path: "/health", tKey: "nav.phase2", label: "Phase 2: Health", icon: Activity },
-  { path: "/harvesting", tKey: "nav.phase3", label: "Phase 3: Harvesting", icon: Wheat },
-  { path: "/selling", tKey: "nav.phase4", label: "Phase 4: Selling", icon: BadgeIndianRupee },
-  { path: "/prediction", tKey: "nav.prediction", label: "Phase 5: Yield AI", icon: Brain },
-  { path: "/schemes", tKey: "nav.phase5", label: "Phase 6: Schemes", icon: Landmark },
+  { path: "/", tKey: "nav.phase1", label: "Planning", icon: Sprout },
+  { path: "/health", tKey: "nav.phase2", label: "Health", icon: Activity },
+  { path: "/harvesting", tKey: "nav.phase3", label: "Harvesting", icon: Wheat },
+  { path: "/selling", tKey: "nav.phase4", label: "Selling", icon: BadgeIndianRupee },
+  { path: "/schemes", tKey: "nav.phase5", label: "Schemes", icon: Landmark },
   { path: "/subscription", label: "Subscription", icon: Crown },
 ];
 

@@ -73,7 +73,7 @@ function SchemesInterface({  user, onLogout, onEditProfile }) {
   ];
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.05),_transparent_40%),linear-gradient(180deg,#ffffff_0%,#fafafa_100%)]">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={() => setSidebarOpen(false)} />
@@ -93,11 +93,11 @@ function SchemesInterface({  user, onLogout, onEditProfile }) {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center shadow-lg shadow-brand-500/25">
-                <Sprout size={20} />
+                <Landmark size={20} />
               </div>
               <div>
-                <h1 className="font-display font-bold text-lg leading-tight">{t("common.appName")}</h1>
-                <p className="text-[11px] text-brand-300/70 tracking-wide uppercase">{t("common.tagline")}</p>
+                <h1 className="font-display font-bold text-lg leading-tight">Schemes</h1>
+                <p className="text-[11px] text-brand-300/70 tracking-wide uppercase">Government Support</p>
               </div>
             </div>
             <button onClick={() => setSidebarOpen(false)} className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 text-brand-300">

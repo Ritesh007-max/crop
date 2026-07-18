@@ -66,7 +66,7 @@ function SubscriptionInterface({
   const qrCodeUrl = useMemo(() => buildQrUrl(selectedPlan), [selectedPlan]);
 
   return (
-    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,_rgba(34,197,94,0.12),_transparent_36%),linear-gradient(180deg,#f7fbf7_0%,#eef7ef_52%,#ffffff_100%)]">
+    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.05),_transparent_40%),linear-gradient(180deg,#ffffff_0%,#fafafa_100%)]">
       {sidebarOpen ? <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onToggleSidebar} /> : null}
 
       <aside

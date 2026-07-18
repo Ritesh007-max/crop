@@ -18,7 +18,7 @@ function ChatInterface({
   const { t } = useTranslation();
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.05),_transparent_40%),linear-gradient(180deg,#ffffff_0%,#fafafa_100%)]">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onToggleSidebar} />
@@ -125,15 +125,9 @@ function ChatInterface({
               id="btn-detect-location"
               onClick={() => requestLocationAccess && requestLocationAccess(true)}
               disabled={locating || loading}
-              className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full
-                bg-gradient-to-r from-brand-600 to-brand-500
-                text-white font-semibold text-[13px]
-                shadow-lg shadow-brand-500/25
-                hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5
-                disabled:opacity-60 disabled:cursor-wait disabled:hover:translate-y-0
-                transition-all duration-200"
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-full bg-gradient-to-r from-brand-600 to-brand-500 text-white font-semibold text-[13px] shadow-lg shadow-brand-500/25 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-wait disabled:hover:translate-y-0 transition-all duration-200"
             >
-              {(locating || loading) ? <LoaderCircle size={16} className="spinner" /> : <MapPin size={16} />}
+              {(locating || loading) && <LoaderCircle size={16} className="spinner" />}
               <span className="hidden sm:inline">{locating ? "Detecting..." : loading ? "Analysing..." : "Detect My Location"}</span>
               <span className="sm:hidden">{(locating || loading) ? "..." : "Detect"}</span>
             </button>

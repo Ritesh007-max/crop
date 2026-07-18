@@ -205,11 +205,6 @@ function App() {
   const [sellingSessions, setSellingSessions] = useState([]);
   const [sellingSidebarOpen, setSellingSidebarOpen] = useState(false);
 
-  // Phase 5 State
-  const [prediction, setPrediction] = useState(null);
-  const [predictionLoading, setPredictionLoading] = useState(false);
-  const [predictionSidebarOpen, setPredictionSidebarOpen] = useState(false);
-
   function updateField(field, value) {
     setFormState((current) => {
       if (field === "locationSelection") {
@@ -361,22 +356,6 @@ function App() {
     setSellingSidebarOpen(false);
   }
 
-  async function handleRunPrediction(params) {
-    if (!params) {
-      setPrediction(null);
-      return;
-    }
-    setPredictionLoading(true);
-    try {
-      const response = await axios.post(`${BASE_URL}/api/crop-prediction`, params);
-      setPrediction(response.data);
-    } catch (error) {
-      console.error("Prediction failed", error);
-    } finally {
-      setPredictionLoading(false);
-    }
-  }
-
   const propsObject = {
     planning: {
       formState, districts, onFieldChange: updateField, loading, errorMessage, result,
@@ -403,10 +382,6 @@ function App() {
     schemes: {},
     subscription: {
       sidebarOpen: sellingSidebarOpen, onToggleSidebar: () => setSellingSidebarOpen(!sellingSidebarOpen)
-    },
-    prediction: {
-      sidebarOpen: predictionSidebarOpen, onToggleSidebar: () => setPredictionSidebarOpen(!predictionSidebarOpen),
-      prediction, loading: predictionLoading, onRunPrediction: handleRunPrediction
     }
   };
 

@@ -8,7 +8,6 @@ const harvestRoute = require("./routes/harvest");
 const sellingRoute = require("./routes/selling");
 const diseaseDetectionRoute = require("./routes/diseaseDetectionRoutes");
 const authRoute = require("./routes/auth");
-const cropPredictionRoute = require("./routes/crop_prediction_route");
 const schemesRoute = require("./routes/schemes");
 const connectDB = require("./Config/db");
 
@@ -27,7 +26,6 @@ app.use("/api/crop-health", cropHealthRoute);
 app.use("/api/harvest", harvestRoute);
 app.use("/api/selling", sellingRoute);
 app.use("/api", diseaseDetectionRoute);
-app.use("/api", cropPredictionRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/schemes", schemesRoute);
 

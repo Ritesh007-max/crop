@@ -18,12 +18,12 @@
   },
   "nav": {
     "workspace": "Workspace",
-    "phase1": "Phase 1: Planning",
-    "phase2": "Phase 2: Health",
-    "phase3": "Phase 3: Harvesting",
-    "phase4": "Phase 4: Selling",
-    "prediction": "Phase 5: Yield AI",
-    "phase5": "Phase 6: Schemes"
+    "phase1": "Planning",
+    "phase2": "Health",
+    "phase3": "Harvesting",
+    "phase4": "Selling",
+    "prediction": "Yield AI",
+    "phase5": "Schemes"
   },
   "auth": {
     "badge": "AI-Powered Crop Intelligence for Indian Farmers",

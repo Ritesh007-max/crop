@@ -42,7 +42,7 @@ function HarvestInterface({
   };
 
   return (
-    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.09),_transparent_34%),linear-gradient(180deg,#f8fafc_0%,#eef2ff_100%)]">
+    <div className="flex min-h-screen bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.05),_transparent_40%),linear-gradient(180deg,#ffffff_0%,#fafafa_100%)]">
       {sidebarOpen ? <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onToggleSidebar} /> : null}
 
       <aside
@@ -122,9 +122,9 @@ function HarvestInterface({
               type="button"
               disabled={loading}
               onClick={handleSubmit}
-              className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-full bg-gradient-to-r from-brand-600 to-brand-500 text-white font-semibold text-[13px] shadow-lg shadow-brand-500/25 hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 transition-all duration-200 sm:self-auto self-stretch"
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-full bg-gradient-to-r from-brand-600 to-brand-500 text-white font-semibold text-[13px] shadow-lg shadow-brand-500/25 hover:shadow-xl hover:shadow-brand-500/30 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-wait disabled:hover:translate-y-0 transition-all duration-200 sm:self-auto self-stretch"
             >
-              {loading ? <LoaderCircle size={16} className="spinner" /> : <Activity size={16} />}
+              {loading && <LoaderCircle size={16} className="spinner" />}
               <span className="hidden sm:inline">{loading ? "Analyzing..." : "Generate Harvest Plan"}</span>
               <span className="sm:hidden">{loading ? "Analyzing..." : "Run Plan"}</span>
             </button>
