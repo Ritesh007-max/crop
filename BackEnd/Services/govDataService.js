@@ -319,6 +319,8 @@ async function fetchLiveMandiPricesByLocation(latitude, longitude, state, distri
     }
 
     let totalMin = 0, totalMax = 0, totalModal = 0, count = 0;
+    let topMandis = [];
+    
     for (const r of matchedRecords) {
       const minVal = Number(r.min_price);
       const maxVal = Number(r.max_price);
@@ -329,17 +331,31 @@ async function fetchLiveMandiPricesByLocation(latitude, longitude, state, distri
         totalMax += maxVal;
         totalModal += modalVal;
         count++;
+        
+        const marketName = String(r.market || "").toLowerCase();
+        const gPlace = data.results.find(place => place.name.toLowerCase().includes(marketName) || marketName.includes(place.name.toLowerCase()));
+        
+        topMandis.push({
+           market: r.market,
+           district: r.district,
+           price: modalVal,
+           address: gPlace ? gPlace.vicinity : `${r.district}, ${r.state}`
+        });
       }
     }
     
     if (count === 0) return fetchLiveMandiPrices(state, district, commodity);
+    
+    topMandis.sort((a, b) => b.price - a.price);
+    topMandis = topMandis.slice(0, 3);
     
     return {
       low: Math.round(totalMin / count),
       high: Math.round(totalMax / count),
       modal: Math.round(totalModal / count),
       count: count,
-      source: `Nearby Market (${matchedRecords[0].market})`
+      source: `Nearby Market (${matchedRecords[0].market})`,
+      topMandis
     };
 
   } catch (err) {

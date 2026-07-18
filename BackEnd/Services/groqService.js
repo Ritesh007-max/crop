@@ -22,6 +22,7 @@ FARMER INPUTS:
 - Selling Urgency: ${answers.sellingUrgency || "Ask the system for a recommendation"}
 - Storage Available: ${answers.storageAvailable === "yes" ? "Yes" : "No"}
 - Transport Arranged: ${answers.transportArranged === "yes" ? "Yes" : "No"}
+- Labour Available: ${answers.labourAvailable === "yes" ? "Yes" : "No"}
 - Quality Label: ${answers.qualityLabel || "Average lot"}
 - Defect Level: ${answers.defectLabel || "Moderate defects"}
 - Preferred Buyer Channel: ${answers.buyerPreference || "Request suggestion"}
@@ -31,12 +32,15 @@ LIVE MARKET PRICE DATA (Base):
 - High: ${livePriceProfile.high}
 - Trend: ${livePriceProfile.trend}
 - Source: ${livePriceProfile.source || "Static Baseline"}
+- Top Nearby Mandis: ${livePriceProfile.topMandis ? JSON.stringify(livePriceProfile.topMandis) : "None found"}
 
 INSTRUCTIONS:
 1. Determine the 'saleReadiness' rating ("Ready", "Needs Sorting", or "Hold").
 2. Mathematically adjust the Expected Price Range based on the lot's quality and defects (e.g. poor quality fetches lower than market average). 
 3. Calculate realistic total logistics costs (transport, handling, storage if applicable).
 4. Make a hard recommendation on whether to "Sell immediately", "Wait for better prices", "Store temporarily", or "Sort first, then sell". Consider the crop's perishability heavily here (e.g., don't tell them to store ripe tomatoes for weeks).
+5. In the "buyerVisibility" section, if "Top Nearby Mandis" is provided, recommend the highest paying mandi by name, include its exact address (from the 'address' field), and the expected price. This is crucial so the farmer knows EXACTLY where to go.
+6. In the "historicalPriceContext", provide an array of 5 realistic previous prices (numbers) leading up to the current estimated price to show the trend.
 
 You MUST respond ONLY with a valid JSON object matching the exact structure below. Do not include markdown blocks or any other text.
 
@@ -67,7 +71,8 @@ You MUST respond ONLY with a valid JSON object matching the exact structure belo
     },
     "historicalPriceContext": {
       "trend": "above average / average / below average",
-      "note": "Context on the price"
+      "note": "Context on the price",
+      "historicalPrices": [2100, 2150, 2200, 2180, 2250]
     },
     "costAndMarginView": {
       "bestCaseMargin": 45000,
@@ -92,7 +97,7 @@ You MUST respond ONLY with a valid JSON object matching the exact structure belo
     "buyerVisibility": {
       "preferredChannel": "Mandi / Contractor / Local buyer / Platform",
       "buyers": [
-         { "name": "Trader", "channel": "Mandi", "priceRange": "Market linked", "note": "Quick sale" }
+         { "name": "Exact Mandi Name", "channel": "Mandi", "priceRange": "INR 2200", "note": "Address: [Insert exact address here]. Best price nearby." }
       ]
     }
   }

@@ -4,7 +4,6 @@ import {
   ChartColumn,
   CircleDollarSign,
   Clock3,
-  MapPinned,
   PackageCheck,
   Store,
   Truck,
@@ -47,7 +46,6 @@ function SellingCards({ result }) {
     sellNowVsStore,
     storagePartnerOptions,
     transportOptions,
-    buyerVisibility,
   } = result.cards;
 
   return (
@@ -100,7 +98,25 @@ function SellingCards({ result }) {
         </CardShell>
 
         <CardShell icon={<ChartColumn size={20} className="text-brand-700" />} title="Historical Price Context" subtitle={historicalPriceContext?.trend} className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
-          <p className="text-[13px] text-brand-950">{historicalPriceContext?.note}</p>
+          <p className="text-[13px] text-brand-950 mb-3">{historicalPriceContext?.note}</p>
+          {historicalPriceContext?.historicalPrices && historicalPriceContext.historicalPrices.length > 0 && (
+            <div className="flex items-end gap-2 h-16 mt-2 pt-2 border-t border-brand-100">
+              {historicalPriceContext.historicalPrices.map((price, i) => {
+                const maxPrice = Math.max(...historicalPriceContext.historicalPrices);
+                const minPrice = Math.min(...historicalPriceContext.historicalPrices) * 0.9;
+                const heightPercent = Math.max(5, ((price - minPrice) / (maxPrice - minPrice)) * 100);
+                return (
+                  <div key={i} className="flex-1 flex flex-col justify-end items-center h-full group">
+                    <div className="w-full bg-brand-200 rounded-t-md group-hover:bg-brand-400 transition-all relative" style={{ height: `${heightPercent}%` }}>
+                      <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-brand-700 opacity-0 group-hover:opacity-100 transition-opacity bg-white px-1 rounded shadow-sm">
+                        {price}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardShell>
 
         <CardShell icon={<CircleDollarSign size={20} className="text-brand-700" />} title="Cost and Margin View" subtitle="Selling scenario view" className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
@@ -145,17 +161,6 @@ function SellingCards({ result }) {
           </div>
         </CardShell>
 
-        <CardShell icon={<MapPinned size={20} className="text-brand-700" />} title="Buyer and Contractor Visibility" subtitle={buyerVisibility?.preferredChannel} className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
-          <div className="space-y-3">
-            {(buyerVisibility?.buyers || []).map((buyer) => (
-              <div key={buyer.name} className="bg-white/70 rounded-xl p-3 border border-brand-100">
-                <p className="text-[13px] font-bold text-brand-950">{buyer.name}</p>
-                <p className="text-[12px] text-brand-900 mt-1">{buyer.channel} • {buyer.priceRange}</p>
-                <p className="text-[12px] text-brand-900">{buyer.note}</p>
-              </div>
-            ))}
-          </div>
-        </CardShell>
       </div>
     </div>
   );

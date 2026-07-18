@@ -28,6 +28,7 @@ function SellingInterface({
     sellingUrgency: "Ask the system for a recommendation",
     storageAvailable: "no",
     transportArranged: "no",
+    labourAvailable: "no",
     buyerPreference: "Request suggestion",
     qualityLabel: "Average lot",
     qualitySignal: "average",

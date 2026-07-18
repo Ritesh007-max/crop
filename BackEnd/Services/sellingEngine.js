@@ -55,7 +55,8 @@ async function analyzeSelling({ answers = {} }) {
       profile = {
         low: livePrices.low,
         high: livePrices.high,
-        trend: "average"
+        trend: "average",
+        topMandis: livePrices.topMandis || []
       };
       liveSource = livePrices.source;
     }

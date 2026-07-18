@@ -172,9 +172,9 @@ function SellingGuidedQuestions({ answers, onAnswerChange }) {
         <div className="rounded-2xl border border-brand-100 bg-brand-50/40 p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-1">
             <Truck size={18} className="text-brand-600" />
-            <h3 className="text-[14px] font-display font-bold text-gray-800">3. Storage and Transport Readiness</h3>
+            <h3 className="text-[14px] font-display font-bold text-gray-800">3. Logistics and Labour Readiness</h3>
           </div>
-          <p className="text-[12px] text-gray-500 mb-4">These two factors strongly affect whether holding or moving the lot is practical.</p>
+          <p className="text-[12px] text-gray-500 mb-4">These factors strongly affect whether holding, sorting, or moving the lot is practical.</p>
           <div className="flex flex-wrap gap-3">
             <ToggleButton
               active={answers.storageAvailable === "yes"}
@@ -189,6 +189,13 @@ function SellingGuidedQuestions({ answers, onAnswerChange }) {
               activeClass="border-brand-400 bg-white text-brand-700 shadow-sm"
             >
               Transport arranged
+            </ToggleButton>
+            <ToggleButton
+              active={answers.labourAvailable === "yes"}
+              onClick={() => onAnswerChange("labourAvailable", answers.labourAvailable === "yes" ? "no" : "yes")}
+              activeClass="border-brand-400 bg-white text-brand-700 shadow-sm"
+            >
+              Labour available
             </ToggleButton>
           </div>
         </div>
