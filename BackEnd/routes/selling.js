@@ -1,16 +1,19 @@
 const express = require("express");
-const multer = require("multer");
-
 const { analyzeSelling } = require("../Services/sellingEngine");
 
 const router = express.Router();
-const upload = multer();
 
-router.post("/analyze", upload.any(), async (req, res) => {
+router.post("/analyze", async (req, res) => {
   let answers = {};
 
   try {
-    answers = req.body.answers ? JSON.parse(req.body.answers) : {};
+    answers = req.body.answers;
+    if (typeof answers === "string") {
+      answers = JSON.parse(answers);
+    }
+    if (!answers) {
+      answers = req.body;
+    }
   } catch (error) {
     return res.status(400).json({
       success: false,
@@ -20,8 +23,7 @@ router.post("/analyze", upload.any(), async (req, res) => {
 
   try {
     const analysis = await analyzeSelling({
-      answers,
-      fileCount: Array.isArray(req.files) ? req.files.length : 0,
+      answers
     });
 
     res.json({

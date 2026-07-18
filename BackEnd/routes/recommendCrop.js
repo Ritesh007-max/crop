@@ -161,6 +161,7 @@ router.get("/regions", async (_req, res) => {
 const cropRecommendationService = require("../Services/cropRecommendationService");
 const districtCoordinates = require("../seed-data/districtCoordinates.json");
 const { calculateCropScore } = require("../utils/scoring");
+const { fetchWithCache } = require("../utils/apiCache");
 
 /**
  * POST /recommend-crop/from-location
@@ -182,7 +183,7 @@ router.post("/from-location", async (req, res) => {
       if (!state || !district) {
         // 1. Reverse Geocoding via Nominatim
         try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2&addressdetails=1`, {
+          const response = await fetchWithCache(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=jsonv2&addressdetails=1`, {
             headers: { "User-Agent": "Seed2SuccessApp/1.0" },
             signal: AbortSignal.timeout(3000)
           });
@@ -241,7 +242,7 @@ router.post("/from-location", async (req, res) => {
 
     try {
       const soilUrl = `https://rest.isric.org/soilgrids/v2.0/properties/query?lon=${lon}&lat=${lat}&property=phh2o&property=clay&property=sand&property=silt&property=soc&depth=0-5cm&value=mean`;
-      const response = await fetch(soilUrl, { signal: AbortSignal.timeout(3000) });
+      const response = await fetchWithCache(soilUrl, { signal: AbortSignal.timeout(3000) });
       if (response.ok) {
         const data = await response.json();
         const layers = data.properties?.layers || [];
@@ -278,7 +279,7 @@ router.post("/from-location", async (req, res) => {
 
     try {
       const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&hourly=precipitation,relativehumidity_2m`;
-      const response = await fetch(weatherUrl, { signal: AbortSignal.timeout(3000) });
+      const response = await fetchWithCache(weatherUrl, { signal: AbortSignal.timeout(3000) });
       if (response.ok) {
         const data = await response.json();
         temperature = data.current_weather?.temperature ?? 28;
@@ -303,7 +304,7 @@ router.post("/from-location", async (req, res) => {
     let elevation = 150;
     try {
       const elevUrl = `https://api.open-elevation.com/api/v1/lookup?locations=${lat},${lon}`;
-      const response = await fetch(elevUrl, { signal: AbortSignal.timeout(3000) });
+      const response = await fetchWithCache(elevUrl, { signal: AbortSignal.timeout(3000) });
       if (response.ok) {
         const data = await response.json();
         elevation = data.results?.[0]?.elevation ?? 150;

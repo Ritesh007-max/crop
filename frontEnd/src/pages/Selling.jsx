@@ -3,7 +3,6 @@ import { Menu, X, Clock, BadgeIndianRupee, LoaderCircle, LogOut } from "lucide-r
 import { useTranslation } from "react-i18next";
 import PhaseNavigation from "../components/PhaseNavigation";
 import SidebarFooter from "../components/SidebarFooter";
-import SellingPhotoUploader from "../components/SellingPhotoUploader";
 import SellingGuidedQuestions from "../components/SellingGuidedQuestions";
 import SellingCards from "../components/SellingCards";
 
@@ -22,7 +21,6 @@ function SellingInterface({
   onEditProfile,
 }) {
   const { t } = useTranslation();
-  const [files, setFiles] = useState({ photos: {} });
   const [answers, setAnswers] = useState({
     cropType: "",
     quantityValue: 25,
@@ -37,16 +35,13 @@ function SellingInterface({
     defectLevel: "medium",
   });
 
-  const handleFileChange = (type, value) => {
-    setFiles((prev) => ({ ...prev, [type]: value }));
-  };
 
   const handleAnswerChange = (field, value) => {
     setAnswers((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = () => {
-    onSubmit({ files, answers });
+    onSubmit({ answers });
   };
 
   return (
@@ -158,7 +153,6 @@ function SellingInterface({
 
           {!loading && !result ? (
             <>
-              <SellingPhotoUploader files={files} onFileChange={handleFileChange} />
               <SellingGuidedQuestions answers={answers} onAnswerChange={handleAnswerChange} />
             </>
           ) : null}

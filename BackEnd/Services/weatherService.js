@@ -1,6 +1,7 @@
 const DistrictCoordinate = require("../Modules/district");
 const mongoose = require("mongoose");
 const districtCoordinates = require("../seed-data/districtCoordinates.json");
+const { fetchWithCache } = require("../utils/apiCache");
 
 /**
  * Get latitude and longitude for a given state and district.
@@ -37,7 +38,7 @@ async function getCoordinates(state, district) {
 async function fetchWeather(latitude, longitude) {
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true&hourly=precipitation,relativehumidity_2m`;
 
-  const response = await fetch(url, {
+  const response = await fetchWithCache(url, {
     signal: AbortSignal.timeout(4000),
   });
 

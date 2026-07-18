@@ -255,8 +255,102 @@ async function fetchLiveMandiPrices(state, district, commodity) {
   }
 }
 
+/**
+ * Uses Google Maps Places API to find nearby mandis using lat/lon,
+ * then queries data.gov.in to find prices for those exact markets.
+ */
+async function fetchLiveMandiPricesByLocation(latitude, longitude, state, district, commodity) {
+  const googleApiKey = process.env.GOOGLE_VISION_API_KEY;
+
+  if (!latitude || !longitude || !googleApiKey) {
+    return fetchLiveMandiPrices(state, district, commodity);
+  }
+
+  try {
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${latitude},${longitude}&radius=50000&keyword=mandi|apmc|market&key=${googleApiKey}`;
+    
+    const response = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const data = await response.json();
+    
+    if (data.status === "REQUEST_DENIED" || data.status === "OVER_QUERY_LIMIT") {
+      console.warn("Google Maps API failed, falling back to district prices.", data.error_message);
+      return fetchLiveMandiPrices(state, district, commodity);
+    }
+    
+    if (data.status !== "OK" || !data.results || data.results.length === 0) {
+      return fetchLiveMandiPrices(state, district, commodity);
+    }
+
+    // Extract names of nearby markets found by Google Maps
+    const nearbyMarkets = data.results.map(r => r.name.toLowerCase());
+    
+    if (!GOV_API_KEY) return null;
+    const resourceId = "9ef84268-d588-465a-a308-a864a43d0070";
+    const normalisedState = state ? state.trim() : "";
+    const govUrl = `${BASE_URL}/${resourceId}?api-key=${GOV_API_KEY}&format=json&limit=300&filters[state]=${encodeURIComponent(normalisedState)}`;
+    
+    const govRes = await fetch(govUrl, { signal: AbortSignal.timeout(6000) });
+    if (!govRes.ok) return fetchLiveMandiPrices(state, district, commodity);
+    
+    const govData = await govRes.json();
+    if (!govData || govData.status !== "ok" || !govData.records || govData.records.length === 0) {
+       return fetchLiveMandiPrices(state, district, commodity);
+    }
+    
+    const targetCrop = commodity.toLowerCase();
+    const cropRecords = govData.records.filter(r => 
+      String(r.commodity || "").toLowerCase().includes(targetCrop) ||
+      targetCrop.includes(String(r.commodity || "").toLowerCase())
+    );
+    
+    if (cropRecords.length === 0) {
+      return fetchLiveMandiPrices(state, district, commodity);
+    }
+
+    // Filter crop records to only include those in our nearby markets list
+    const matchedRecords = cropRecords.filter(r => {
+      const marketName = String(r.market || "").toLowerCase();
+      // Simple match: if the government market name overlaps with the google maps place name
+      return nearbyMarkets.some(nearby => nearby.includes(marketName) || marketName.includes(nearby));
+    });
+    
+    if (matchedRecords.length === 0) {
+       return fetchLiveMandiPrices(state, district, commodity);
+    }
+
+    let totalMin = 0, totalMax = 0, totalModal = 0, count = 0;
+    for (const r of matchedRecords) {
+      const minVal = Number(r.min_price);
+      const maxVal = Number(r.max_price);
+      const modalVal = Number(r.modal_price);
+      
+      if (!isNaN(minVal) && !isNaN(maxVal) && !isNaN(modalVal)) {
+        totalMin += minVal;
+        totalMax += maxVal;
+        totalModal += modalVal;
+        count++;
+      }
+    }
+    
+    if (count === 0) return fetchLiveMandiPrices(state, district, commodity);
+    
+    return {
+      low: Math.round(totalMin / count),
+      high: Math.round(totalMax / count),
+      modal: Math.round(totalModal / count),
+      count: count,
+      source: `Nearby Market (${matchedRecords[0].market})`
+    };
+
+  } catch (err) {
+    console.error("fetchLiveMandiPricesByLocation failed:", err.message);
+    return fetchLiveMandiPrices(state, district, commodity);
+  }
+}
+
 module.exports = {
   fetchCropProduction,
   getLocalCropNames,
   fetchLiveMandiPrices,
+  fetchLiveMandiPricesByLocation,
 };
